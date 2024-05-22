@@ -29,7 +29,9 @@ func (q *QueryParams) getValueByColumn(column string) string {
 			result := gjson.ParseBytes(body)
 			q.gJsonResult = &result
 		}
-		return q.gJsonResult.Get(strcase.ToLowerCamel(column)).String()
+		if q.gJsonResult.Get(strcase.ToLowerCamel(column)).Exists() {
+			return q.gJsonResult.Get(strcase.ToLowerCamel(column)).String()
+		}
 	}
 
 	if q.Ctx == nil {
