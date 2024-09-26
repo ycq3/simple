@@ -5,6 +5,7 @@ import (
 	"github.com/mlogclub/simple/common/strs/strcase"
 	"github.com/mlogclub/simple/sqls"
 	"github.com/tidwall/gjson"
+	"strings"
 )
 
 type QueryParams struct {
@@ -137,5 +138,22 @@ func (q *QueryParams) BetweenByReq(column string) *QueryParams {
 	if len(result) > 1 {
 		q.Cnd.Where(column+" BETWEEN ? AND ?", result[0].String(), result[1].String())
 	}
+	return q
+}
+
+func (q *QueryParams) SortByReq() *QueryParams {
+	//q.Orders = append(q.Orders, sqls.OrderByCol{Column: column, Asc: false})
+	params := q.Ctx.URLParams()
+	for k, p := range params {
+		if strings.HasPrefix(k, "sort[") && strings.HasSuffix(k, "]") {
+			name := k[5 : len(k)-1]
+			if p == "asc" || p == "ascend" {
+				q.Asc(name)
+			} else {
+				q.Desc(name)
+			}
+		}
+	}
+
 	return q
 }
