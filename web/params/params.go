@@ -130,24 +130,25 @@ func GetInt64Arr(c iris.Context, name string) []int64 {
 			}
 			return ret
 		} else {
-			return StrSplitToInt64Arr(str)
+			return StrSplitToInt64Arr[int64](str)
 		}
 	}
 	return nil
 }
 
-func StrSplitToInt64Arr(str string) (ret []int64) {
+func StrSplitToInt64Arr[T int64 | uint64](str string) (ret []T) {
 	if strs.IsNotBlank(str) {
 		ss := strings.Split(str, ",")
 		for _, s := range ss {
-			i, err := cast.ToInt64E(s)
+			i, err := cast.ToUint64E(s)
 			if err == nil {
-				ret = append(ret, i)
+				ret = append(ret, T(i))
 			}
 		}
 	}
 	return
 }
+
 
 func FormValue(ctx iris.Context, name string) string {
 	return ctx.FormValue(name)
@@ -205,9 +206,25 @@ func FormValueInt64Array(ctx iris.Context, name string) []int64 {
 		}
 		return ret
 	} else {
-		return StrSplitToInt64Arr(str)
+		return StrSplitToInt64Arr[int64](str)
 	}
 }
+
+func FormValueUInt64Array(ctx iris.Context, name string) []uint64 {
+	str := ctx.FormValue(name)
+	str = strings.TrimSpace(str)
+	if strings.HasPrefix(str, "[") && strings.HasSuffix(str, "]") {
+		var ret []uint64
+		if err := jsons.Parse(str, &ret); err != nil {
+			slog.Error(err.Error())
+		}
+		return ret
+	} else {
+		return StrSplitToInt64Arr[uint64](str)
+	}
+}
+
+
 
 func FormValueStringArray(ctx iris.Context, name string) []string {
 	str := ctx.FormValue(name)
